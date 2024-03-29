@@ -11,13 +11,29 @@ import Template
 
 class Frontend {
     
+    let descriptor = FolderDescriptor(folderPath: "/Users/tomaskuc/dev/CreateMLAnnotator")
+    
     init(_ server: HttpServer) {
         var mainTemplate: Template {
             Template(from: "templates/index.html")
         }
-        server["/"] = { _, _ in
+        server["/"] = { [weak self] request, _ in
             let template = mainTemplate
             template.assign(["content": "Welcome to AI label system"])
+            
+            let formData = request.flatFormData()
+            if let topTxt = formData["top"], let top = Int(topTxt),
+               let leftTxt = formData["left"], let left = Int(leftTxt),
+               let widthTxt = formData["width"], let width = Int(widthTxt),
+               let heightTxt = formData["height"], let height = Int(heightTxt),
+               let filename = formData["filename"], let label = formData["label"] {
+                let image = Image(filename: filename, annotations: [Annotation(label: label,
+                                                                               coordinates: Coordinate(x: top,
+                                                                                                       y: left,
+                                                                                                       width: width,
+                                                                                                       height: height))])
+                self?.descriptor?.add(image: image)
+            }
             return .ok(.html(template.output))
         }
         

@@ -1,6 +1,6 @@
 var counter = 0
 
-function setup() {
+function setup(filename) {
     var width = $("#picture").width()
     var ratio = 800/width
     console.log(ratio)
@@ -56,17 +56,17 @@ function setup() {
         number.addClass("counter");
         border.append(number);
         border = undefined;
-        makeForm(counter, top, left, width, height)
+        makeForm(counter, top, left, width, height, filename)
     });
 }
 
-function makeForm(counter, top, left, width, height) {
+function makeForm(counter, top, left, width, height, filename) {
     var form = $('<form method="post"/>');
     var index = $("<div/>");
     index.addClass("counter");
     index.css({float: "left"});
     index.html(counter);
-    var input = $('<input class="form-control-sm" type="text" placeholder="label">');
+    var input = $('<input class="form-control-sm" type="text" name="label" placeholder="label">');
     form.append(input);
     var submit = $('<input type="submit" class="btn btn-sm btn-primary" value="Save"/>');
     form.append(submit);
@@ -75,6 +75,7 @@ function makeForm(counter, top, left, width, height) {
     addHiddenInput(form, "left", left);
     addHiddenInput(form, "width", width);
     addHiddenInput(form, "height", height);
+    addHiddenInput(form, "filename", filename);
     $("#formContainer").append(form);
 }
 

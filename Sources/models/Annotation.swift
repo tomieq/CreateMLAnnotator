@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Annotation: Codable {
+struct Annotation: Codable {
     let label: String
     let coordinates: Coordinate
 }
