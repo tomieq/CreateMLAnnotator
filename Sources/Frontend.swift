@@ -13,6 +13,7 @@ class Frontend {
     
     let picturesPath = ArgumentParser.getValue("pictures") ?? FileManager.default.currentDirectoryPath
     let descriptor: FolderDescriptor?
+    let converter = DataConverter()
     
     init(_ server: HttpServer) {
         print("Loaded pictures from parameter `pictures`: \(self.picturesPath)")
@@ -53,7 +54,7 @@ class Frontend {
                let heightTxt = formData["height"], let height = Int(heightTxt),
                let filename = formData["filename"], let label = formData["label"] {
 
-                let coordinate = Coordinate(x: left, y: top, width: width, height: height)
+                let coordinate = self.converter.uiToCreateML(left: left, top: top, width: width, height: height)
                 let image = Image(filename: filename, annotations: [Annotation(label: label,
                                                                                coordinates: coordinate)])
                 self.descriptor?.add(image: image)
@@ -67,15 +68,16 @@ class Frontend {
             var counter = 0
             self.descriptor?.annotationsFor(filename: filename).forEach {
                 counter += 1
-                picTemplate.assign(["left" : $0.coordinates.x,
-                                    "top": $0.coordinates.y,
-                                    "width": $0.coordinates.width,
-                                    "height": $0.coordinates.height,
+                let size = self.converter.createMLToUI(coordinate: $0.coordinates)
+                picTemplate.assign(["left" : size.left,
+                                    "top": size.top,
+                                    "width": size.width,
+                                    "height": size.height,
                                     "counter": counter], inNest: "frame")
-                picTemplate.assign(["left" : $0.coordinates.x,
-                                    "top": $0.coordinates.y,
-                                    "width": $0.coordinates.width,
-                                    "height": $0.coordinates.height,
+                picTemplate.assign(["left" : size.left,
+                                    "top": size.top,
+                                    "width": size.width,
+                                    "height": size.height,
                                     "filename": filename,
                                     "label": $0.label,
                                     "counter": counter], inNest: "form")
