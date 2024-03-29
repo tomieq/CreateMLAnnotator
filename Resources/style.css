@@ -7,3 +7,41 @@
 .tomieqFont {
     color: #44009C;
 }
+
+#imageContainer {
+    padding: 0px;
+}
+
+#formContainer {
+    position: absolute;
+    top: 0;
+    left: 805px;
+}
+.counter {
+    background-color: blue;
+    font-size: 14px;
+    color: white;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+}
+
+.frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 2px solid blue;
+    padding: 0px;
+    margin: 0px;
+}
+
+.frame div {
+    padding: 0;
+    margin: -2px;
+    top: 0px;
+    left: 0px;
+}
+
+.absolute {
+    position: absolute;
+}
