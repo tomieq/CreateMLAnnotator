@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "swifter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tomieq/swifter.git",
+      "state" : {
+        "revision" : "73feab404a16df1f9d66ebaa4d75e76aa19927a6",
+        "version" : "1.5.6"
+      }
+    },
+    {
+      "identity" : "template.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tomieq/Template.swift.git",
+      "state" : {
+        "revision" : "2005d16cd57a5cf76cd3fd2caff8901f01e2c9e3",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
