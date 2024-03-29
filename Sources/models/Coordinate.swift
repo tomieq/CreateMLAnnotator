@@ -13,3 +13,5 @@ struct Coordinate: Codable {
     let width: Int
     let height: Int
 }
+
+extension Coordinate: Equatable {}

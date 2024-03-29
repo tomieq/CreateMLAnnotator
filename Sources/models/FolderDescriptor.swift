@@ -23,7 +23,12 @@ class FolderDescriptor {
     
     func add(image: Image) {
         if let existingImage = (self.images.first { $0.filename == image.filename }) {
-            existingImage.annotations.append(contentsOf: image.annotations)
+            guard let coordinates = image.annotations.first?.coordinates else { return }
+            if let annotation = (existingImage.annotations.first { $0.coordinates == coordinates}) {
+                annotation.label = image.annotations.first!.label
+            } else {
+                existingImage.annotations.append(contentsOf: image.annotations)
+            }
         } else {
             self.images.append(image)
         }
