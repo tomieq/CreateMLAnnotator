@@ -11,6 +11,7 @@ class FolderDescriptor {
     private let folderPath: String
     private let descriptorUrl: URL
     private var images: [Image] = []
+    let filenames: [String]
     
     init?(folderPath: String) {
         self.folderPath = folderPath
@@ -19,8 +20,27 @@ class FolderDescriptor {
         if let data = try? Data(contentsOf: self.descriptorUrl), let images = [Image](json: data) {
             self.images = images
         }
+        let images = try? FileManager.default.contentsOfDirectory(atPath: self.folderPath)
+            .filter { $0.contains(".jpg") }
+            .sorted()
+        self.filenames = images ?? []
     }
     
+    func nextFile(to filename: String) -> String? {
+        if let index = self.filenames.firstIndex(of: filename), index + 1 < self.filenames.count {
+            return self.filenames[index + 1]
+        }
+        return nil
+    }
+    
+    
+    func previousFile(to filename: String) -> String? {
+        if let index = self.filenames.firstIndex(of: filename), index - 1 > 0 {
+            return self.filenames[index - 1]
+        }
+        return nil
+    }
+
     func add(image: Image) {
         if let existingImage = (self.images.first { $0.filename == image.filename }) {
             guard let coordinates = image.annotations.first?.coordinates else { return }

@@ -20,23 +20,22 @@ class Frontend {
         var mainTemplate: Template {
             Template(from: "templates/index.html")
         }
-        server["/"] = { [weak self] request, _ in
+        server["/"] = { request, _ in
             let template = mainTemplate
             template.assign(["content": "Welcome to AI label system"])
-            
-            let formData = request.flatFormData()
-            if let topTxt = formData["top"], let top = Int(topTxt),
-               let leftTxt = formData["left"], let left = Int(leftTxt),
-               let widthTxt = formData["width"], let width = Int(widthTxt),
-               let heightTxt = formData["height"], let height = Int(heightTxt),
-               let filename = formData["filename"], let label = formData["label"] {
-
-                let coordinate = Coordinate(x: left, y: top, width: width, height: height)
-                let image = Image(filename: filename, annotations: [Annotation(label: label,
-                                                                               coordinates: coordinate)])
-                self?.descriptor?.add(image: image)
-            }
             return .ok(.html(template.output))
+        }
+        
+        server["/previous"] = { [weak self] request, _ in
+            guard let filename = request.queryParam("to") else { return .badRequest() }
+            guard let previousFile = self?.descriptor?.previousFile(to: filename) else { return .notFound() }
+            return .movedTemporarily("/file?name=\(previousFile)")
+        }
+        
+        server["/next"] = { [weak self] request, _ in
+            guard let filename = request.queryParam("to") else { return .badRequest() }
+            guard let nextFile = self?.descriptor?.nextFile(to: filename) else { return .notFound() }
+            return .movedTemporarily("/file?name=\(nextFile)")
         }
         
         server["/file"] = { [unowned self] request, _ in
