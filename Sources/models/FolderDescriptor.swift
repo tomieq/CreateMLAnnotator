@@ -30,6 +30,13 @@ class FolderDescriptor {
         self.save()
     }
     
+    func annotationsFor(filename: String) -> [Annotation] {
+        guard let image = (self.images.first { $0.filename == filename } ) else {
+            return []
+        }
+        return image.annotations
+    }
+    
     func save() {
         if let json = self.images.json {
             try? json.write(to: descriptorUrl, atomically: false, encoding: .utf8)

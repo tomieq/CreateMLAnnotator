@@ -31,11 +31,55 @@ class Frontend {
                let heightTxt = formData["height"], let height = Int(heightTxt),
                let filename = formData["filename"], let label = formData["label"] {
 
-                let coordinate = Coordinate(x: top, y: left, width: width, height: height)
+                let coordinate = Coordinate(x: left, y: top, width: width, height: height)
                 let image = Image(filename: filename, annotations: [Annotation(label: label,
                                                                                coordinates: coordinate)])
                 self?.descriptor?.add(image: image)
             }
+            return .ok(.html(template.output))
+        }
+        
+        server["/file"] = { [unowned self] request, _ in
+            guard let filename = request.queryParam("name") else {
+                return .badRequest()
+            }
+            guard FileManager.default.fileExists(atPath: self.picturesPath + "/\(filename)") else {
+                return .notFound()
+            }
+
+            let formData = request.flatFormData()
+            if let topTxt = formData["top"], let top = Int(topTxt),
+               let leftTxt = formData["left"], let left = Int(leftTxt),
+               let widthTxt = formData["width"], let width = Int(widthTxt),
+               let heightTxt = formData["height"], let height = Int(heightTxt),
+               let filename = formData["filename"], let label = formData["label"] {
+
+                let coordinate = Coordinate(x: left, y: top, width: width, height: height)
+                let image = Image(filename: filename, annotations: [Annotation(label: label,
+                                                                               coordinates: coordinate)])
+                self.descriptor?.add(image: image)
+            }
+
+            let template = mainTemplate
+            let picTemplate = Template(from: "templates/picture.tpl.html")
+            picTemplate.assign(["filename": filename])
+            template.assign(["filename": filename], inNest: "script")
+            
+            self.descriptor?.annotationsFor(filename: filename).forEach {
+                picTemplate.assign(["left" : $0.coordinates.x,
+                                    "top": $0.coordinates.y,
+                                    "width": $0.coordinates.width,
+                                    "height": $0.coordinates.height], inNest: "frame")
+                picTemplate.assign(["left" : $0.coordinates.x,
+                                    "top": $0.coordinates.y,
+                                    "width": $0.coordinates.width,
+                                    "height": $0.coordinates.height,
+                                    "filename": filename,
+                                    "label": $0.label], inNest: "form")
+            }
+            template.assign(["content": picTemplate.output])
+            
+
             return .ok(.html(template.output))
         }
         

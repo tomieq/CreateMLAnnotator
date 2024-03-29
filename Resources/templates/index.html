@@ -25,25 +25,6 @@
                 </div>
                 [END error]
                 {content}
-                <div style="position: relative;">
-                    <div id="imageContainer">
-                        <img src="pic.jpg" id="picture" class="absolute"/>
-                        <div class="frame absolute" style="left: 739px; top: 499px; width: 1205px; height: 735px;">
-                            <div class="counter">1</div>
-                        </div>
-                    </div>
-                    <div id="formContainer">
-                        <form method="post">
-                            <div class="counter" style="float: left;">1</div>
-                            <input class="form-control-sm" type="text" placeholder="label" />
-                            <input type="hidden" name="left" value="739" />
-                            <input type="hidden" name="top" value="499" />
-                            <input type="hidden" name="width" value="1205" />
-                            <input type="hidden" name="height" value="735" />
-                            <input type="submit" class="btn btn-sm btn-primary" value="Save"/>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -51,7 +32,9 @@
     <script src="/script.js"></script>
     <script src="/bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <script>
-        setup("audi.jpg");
+        [START script]
+        setup("{filename}");
+        [END script]
     </script>
   </body>
 </html>
