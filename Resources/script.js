@@ -1,6 +1,7 @@
 var counter = 0
 
 function setup(filename) {
+    counter = $("#formContainer form").length
     var width = $("#picture").width()
     var ratio = 800/width
     console.log(ratio)

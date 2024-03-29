@@ -65,17 +65,21 @@ class Frontend {
             picTemplate.assign(["filename": filename])
             template.assign(["filename": filename], inNest: "script")
             
+            var counter = 0
             self.descriptor?.annotationsFor(filename: filename).forEach {
+                counter += 1
                 picTemplate.assign(["left" : $0.coordinates.x,
                                     "top": $0.coordinates.y,
                                     "width": $0.coordinates.width,
-                                    "height": $0.coordinates.height], inNest: "frame")
+                                    "height": $0.coordinates.height,
+                                    "counter": counter], inNest: "frame")
                 picTemplate.assign(["left" : $0.coordinates.x,
                                     "top": $0.coordinates.y,
                                     "width": $0.coordinates.width,
                                     "height": $0.coordinates.height,
                                     "filename": filename,
-                                    "label": $0.label], inNest: "form")
+                                    "label": $0.label,
+                                    "counter": counter], inNest: "form")
             }
             template.assign(["content": picTemplate.output])
             

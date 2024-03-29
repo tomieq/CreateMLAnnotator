@@ -6,14 +6,14 @@
         <img src="{filename}" id="picture" class="absolute"/>
         [START frame]
         <div class="frame absolute" style="left: {left}px; top: {top}px; width: {width}px; height: {height}px;">
-            <div class="counter">1</div>
+            <div class="counter">{counter}</div>
         </div>
         [END frame]
     </div>
     <div id="formContainer">
         [START form]
         <form method="post">
-            <div class="counter" style="float: left;">1</div>
+            <div class="counter" style="float: left;">{counter}</div>
             <input class="form-control-sm" type="text" name="label" value="{label}" placeholder="label" />
             <input type="hidden" name="left" value="{left}" />
             <input type="hidden" name="top" value="{top}" />
