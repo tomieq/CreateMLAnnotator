@@ -39,6 +39,14 @@ class Frontend {
             return .movedTemporarily("/file?name=\(nextFile)")
         }
         
+        server["/remove"] = { [unowned self] request, _ in
+            guard let filename = request.queryParam("file") else { return .badRequest() }
+            try? FileManager.default.removeItem(atPath: self.picturesPath + "/\(filename)")
+            guard let nextFile = self.descriptor?.nextFile(to: filename) else { return .notFound() }
+            self.descriptor?.reloadFiles()
+            return .movedTemporarily("/file?name=\(nextFile)")
+        }
+        
         server["/file"] = { [unowned self] request, _ in
             guard let filename = request.queryParam("name") else {
                 return .badRequest()

@@ -11,7 +11,7 @@ class FolderDescriptor {
     private let folderPath: String
     private let descriptorUrl: URL
     private var images: [Image] = []
-    let filenames: [String]
+    private var filenames: [String] = []
     
     init?(folderPath: String) {
         self.folderPath = folderPath
@@ -20,6 +20,10 @@ class FolderDescriptor {
         if let data = try? Data(contentsOf: self.descriptorUrl), let images = [Image](json: data) {
             self.images = images
         }
+        self.reloadFiles()
+    }
+    
+    func reloadFiles() {
         let images = try? FileManager.default.contentsOfDirectory(atPath: self.folderPath)
             .filter { $0.contains(".jpg") }
             .sorted()
