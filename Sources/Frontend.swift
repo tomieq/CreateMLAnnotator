@@ -21,28 +21,32 @@ class Frontend {
         var mainTemplate: Template {
             Template(from: "templates/index.html")
         }
-        server["/"] = { request, _ in
+        server["/"] = { [weak self] request, _ in
             let template = mainTemplate
-            template.assign(["content": "Welcome to AI label system"])
+            let listTemplate = Template(from: "templates/list.tpl.html")
+            self?.descriptor?.filenames.forEach {
+                listTemplate.assign(["filename": $0], inNest: "link")
+            }
+            template.assign(["content": listTemplate.output])
             return .ok(.html(template.output))
         }
         
         server["/previous"] = { [weak self] request, _ in
             guard let filename = request.queryParam("to") else { return .badRequest() }
-            guard let previousFile = self?.descriptor?.previousFile(to: filename) else { return .notFound() }
+            guard let previousFile = self?.descriptor?.previousFile(to: filename) else { return .movedTemporarily("/") }
             return .movedTemporarily("/file?name=\(previousFile)")
         }
         
         server["/next"] = { [weak self] request, _ in
             guard let filename = request.queryParam("to") else { return .badRequest() }
-            guard let nextFile = self?.descriptor?.nextFile(to: filename) else { return .notFound() }
+            guard let nextFile = self?.descriptor?.nextFile(to: filename) else { return .movedTemporarily("/") }
             return .movedTemporarily("/file?name=\(nextFile)")
         }
         
         server["/remove"] = { [unowned self] request, _ in
             guard let filename = request.queryParam("file") else { return .badRequest() }
             try? FileManager.default.removeItem(atPath: self.picturesPath + "/\(filename)")
-            guard let nextFile = self.descriptor?.nextFile(to: filename) else { return .notFound() }
+            guard let nextFile = self.descriptor?.nextFile(to: filename) else { return .movedTemporarily("/")}
             self.descriptor?.reloadFiles()
             return .movedTemporarily("/file?name=\(nextFile)")
         }

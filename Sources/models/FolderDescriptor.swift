@@ -11,7 +11,7 @@ class FolderDescriptor {
     private let folderPath: String
     private let descriptorUrl: URL
     private var images: [Image] = []
-    private var filenames: [String] = []
+    var filenames: [String] = []
     
     init?(folderPath: String) {
         self.folderPath = folderPath
