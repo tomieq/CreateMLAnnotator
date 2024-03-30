@@ -8,17 +8,17 @@
 import Foundation
 
 class DataConverter {
-    func uiToCreateML(left: Int, top: Int, width: Int, height: Int) -> Coordinate {
-        Coordinate(x: left + width / 2,
-                   y: top + height / 2,
-                   width: width,
-                   height: height)
+    func uiToCreateML(frame: Frame) -> Coordinate {
+        Coordinate(x: frame.left + frame.width / 2,
+                   y: frame.top + frame.height / 2,
+                   width: frame.width,
+                   height: frame.height)
     }
     
-    func createMLToUI(coordinate: Coordinate) -> (left: Int, top: Int, width: Int, height: Int) {
-        (left: coordinate.x - coordinate.width / 2,
-         top: coordinate.y - coordinate.height / 2,
-         width: coordinate.width,
-         height: coordinate.height)
+    func createMLToUI(coordinate: Coordinate) -> Frame {
+        Frame(left: coordinate.x - coordinate.width / 2,
+              top: coordinate.y - coordinate.height / 2,
+              width: coordinate.width,
+              height: coordinate.height)
     }
 }

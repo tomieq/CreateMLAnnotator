@@ -60,13 +60,10 @@ class Frontend {
             }
 
             let formData = request.flatFormData()
-            if let topTxt = formData["top"], let top = Int(topTxt),
-               let leftTxt = formData["left"], let left = Int(leftTxt),
-               let widthTxt = formData["width"], let width = Int(widthTxt),
-               let heightTxt = formData["height"], let height = Int(heightTxt),
+            if let frameJson = formData["frame"], let frame = Frame(json: frameJson),
                let filename = formData["filename"], let label = formData["label"] {
 
-                let coordinate = self.converter.uiToCreateML(left: left, top: top, width: width, height: height)
+                let coordinate = self.converter.uiToCreateML(frame: frame)
                 let image = Image(filename: filename, annotations: [Annotation(label: label,
                                                                                coordinates: coordinate)])
                 self.descriptor?.add(image: image)
@@ -80,16 +77,13 @@ class Frontend {
             var counter = 0
             self.descriptor?.annotationsFor(filename: filename).forEach {
                 counter += 1
-                let size = self.converter.createMLToUI(coordinate: $0.coordinates)
-                picTemplate.assign(["left" : size.left,
-                                    "top": size.top,
-                                    "width": size.width,
-                                    "height": size.height,
+                let frame = self.converter.createMLToUI(coordinate: $0.coordinates)
+                picTemplate.assign(["left" : frame.left,
+                                    "top": frame.top,
+                                    "width": frame.width,
+                                    "height": frame.height,
                                     "counter": counter], inNest: "frame")
-                picTemplate.assign(["left" : size.left,
-                                    "top": size.top,
-                                    "width": size.width,
-                                    "height": size.height,
+                picTemplate.assign(["frame" : frame.jsonOneLine!,
                                     "filename": filename,
                                     "label": $0.label,
                                     "counter": counter], inNest: "form")

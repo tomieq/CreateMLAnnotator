@@ -72,15 +72,12 @@ function makeForm(counter, top, left, width, height, filename) {
     var submit = $('<input type="submit" class="btn btn-sm btn-primary" value="Save"/>');
     form.append(submit);
     form.append(index);
-    addHiddenInput(form, "top", top);
-    addHiddenInput(form, "left", left);
-    addHiddenInput(form, "width", width);
-    addHiddenInput(form, "height", height);
+    addHiddenInput(form, "frame", '{"top":'+top+',"left":'+left+',"width":'+width+',"height":'+height+'}');
     addHiddenInput(form, "filename", filename);
     $("#formContainer").append(form);
 }
 
 function addHiddenInput(form, name, value) {
-    var input = $('<input type="hidden" name="'+name+'" value="'+value+'"/>');
+    var input = $('<input type="hidden" name="'+name+'" value=\''+value+'\'/>');
     form.append(input);
 }
