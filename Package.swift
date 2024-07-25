@@ -7,7 +7,7 @@ let package = Package(
     name: "CreateMLAnnotator",
     dependencies: [
         .package(url: "https://github.com/tomieq/swifter.git", .upToNextMajor(from: "1.5.6")),
-        .package(url: "https://github.com/tomieq/Template.swift.git", .upToNextMajor(from: "1.0.0"))
+        .package(url: "https://github.com/tomieq/Template.swift.git", .upToNextMajor(from: "1.1.0"))
     ],
     targets: [
         .executableTarget(

@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tomieq/Template.swift.git",
       "state" : {
-        "revision" : "2005d16cd57a5cf76cd3fd2caff8901f01e2c9e3",
-        "version" : "1.0.0"
+        "revision" : "8fea1c53e65664a203210604ff49fff917856960",
+        "version" : "1.1.0"
       }
     }
   ],

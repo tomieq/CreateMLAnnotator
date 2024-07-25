@@ -19,7 +19,7 @@ class Frontend {
         print("Loaded pictures from parameter `pictures`: \(self.picturesPath)")
         self.descriptor = FolderDescriptor(folderPath: self.picturesPath)
         var mainTemplate: Template {
-            Template(from: "templates/index.html")
+            Template.cahed(from: "templates/index.html")
         }
         server["/"] = { [weak self] request, _ in
             let template = mainTemplate
@@ -27,7 +27,7 @@ class Frontend {
             self?.descriptor?.filenames.forEach {
                 listTemplate.assign(["filename": $0], inNest: "link")
             }
-            template.assign(["content": listTemplate.output])
+            template.assign("content", listTemplate.output)
             return .ok(.html(template.output))
         }
         
@@ -71,7 +71,7 @@ class Frontend {
 
             let template = mainTemplate
             let picTemplate = Template(from: "templates/picture.tpl.html")
-            picTemplate.assign(["filename": filename])
+            picTemplate.assign("filename", filename)
             template.assign(["filename": filename], inNest: "script")
             
             var counter = 0
@@ -88,7 +88,7 @@ class Frontend {
                                     "label": $0.label,
                                     "counter": counter], inNest: "form")
             }
-            template.assign(["content": picTemplate.output])
+            template.assign("content", picTemplate.output)
             
 
             return .ok(.html(template.output))
