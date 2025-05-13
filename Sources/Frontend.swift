@@ -7,44 +7,62 @@
 
 import Foundation
 import Swifter
+import BootstrapTemplate
 import Template
+import Env
 
 class Frontend {
     
-    let picturesPath = ArgumentParser.getValue("pictures") ?? FileManager.default.currentDirectoryPath
+    let picturesPath = Env().get("folder") ?? FileManager.default.currentDirectoryPath
     let descriptor: FolderDescriptor?
     let converter = DataConverter()
     
     init(_ server: HttpServer) {
         print("Loaded pictures from parameter `pictures`: \(self.picturesPath)")
         self.descriptor = FolderDescriptor(folderPath: self.picturesPath)
-        var mainTemplate: Template {
-            Template.cahed(from: "templates/index.html")
+        
+        func wrapTemplate(_ content: CustomStringConvertible) -> BootstrapTemplate {
+            let main = BootstrapTemplate()
+            main.body = content
+            main.addCSS(url: "style.css")
+            return main
         }
+
+        var pageTemplate: Template {
+            Template.cached(relativePath: "templates/index.html")
+        }
+        
         server["/"] = { [weak self] request, _ in
-            let template = mainTemplate
-            let listTemplate = Template(from: "templates/list.tpl.html")
+
+            let listTemplate = Template.cached(relativePath: "templates/list.tpl.html")
             self?.descriptor?.filenames.forEach {
                 listTemplate.assign(["filename": $0], inNest: "link")
             }
-            template.assign("content", listTemplate.output)
-            return .ok(.html(template.output))
+            let template = pageTemplate
+            template["content"] = listTemplate
+            return .ok(.html(wrapTemplate(template)))
+        }
+        
+        server.get["editor.js"] = { request, _ in
+            let js = Template.cached(relativePath: "templates/editor.tpl.js")
+            js["filename"] = request.queryParams.get("filename")
+            return .ok(.js(js))
         }
         
         server["/previous"] = { [weak self] request, _ in
-            guard let filename = request.queryParam("to") else { return .badRequest() }
+            guard let filename = request.queryParams.get("to") else { return .badRequest() }
             guard let previousFile = self?.descriptor?.previousFile(to: filename) else { return .movedTemporarily("/") }
             return .movedTemporarily("/file?name=\(previousFile)")
         }
         
         server["/next"] = { [weak self] request, _ in
-            guard let filename = request.queryParam("to") else { return .badRequest() }
+            guard let filename = request.queryParams.get("to") else { return .badRequest() }
             guard let nextFile = self?.descriptor?.nextFile(to: filename) else { return .movedTemporarily("/") }
             return .movedTemporarily("/file?name=\(nextFile)")
         }
         
         server["/remove"] = { [unowned self] request, _ in
-            guard let filename = request.queryParam("file") else { return .badRequest() }
+            guard let filename = request.queryParams.get("file") else { return .badRequest() }
             try? FileManager.default.removeItem(atPath: self.picturesPath + "/\(filename)")
             guard let nextFile = self.descriptor?.nextFile(to: filename) else { return .movedTemporarily("/")}
             self.descriptor?.reloadFiles()
@@ -52,27 +70,27 @@ class Frontend {
         }
         
         server["/file"] = { [unowned self] request, _ in
-            guard let filename = request.queryParam("name") else {
+            guard let filename = request.queryParams.get("name") else {
                 return .badRequest()
             }
             guard FileManager.default.fileExists(atPath: self.picturesPath + "/\(filename)") else {
                 return .notFound()
             }
-
-            let formData = request.flatFormData()
-            if let frameJson = formData["frame"], let frame = Frame(json: frameJson),
-               let filename = formData["filename"], let label = formData["label"] {
+            struct Input: Codable {
+                let frame: String
+                let label: String
+            }
+            let input: Input = try request.formData.decode()
+            if let frame = Frame(json: input.frame) {
 
                 let coordinate = self.converter.uiToCreateML(frame: frame)
-                let image = Image(filename: filename, annotations: [Annotation(label: label,
+                let image = Image(filename: filename, annotations: [Annotation(label: input.label,
                                                                                coordinates: coordinate)])
                 self.descriptor?.add(image: image)
             }
-
-            let template = mainTemplate
-            let picTemplate = Template(from: "templates/picture.tpl.html")
+            let template = pageTemplate
+            let picTemplate = Template.cached(relativePath: "templates/picture.tpl.html")
             picTemplate.assign("filename", filename)
-            template.assign(["filename": filename], inNest: "script")
             
             var counter = 0
             self.descriptor?.annotationsFor(filename: filename).forEach {
@@ -88,46 +106,25 @@ class Frontend {
                                     "label": $0.label,
                                     "counter": counter], inNest: "form")
             }
-            template.assign("content", picTemplate.output)
             
-
-            return .ok(.html(template.output))
+            template["content"] = picTemplate
+            let mainTemplate = wrapTemplate(template)
+            mainTemplate.addJS(url: "/editor.js?filename=" + filename)
+            mainTemplate.addJS(url: "/script.js")
+            return .ok(.html(mainTemplate))
         }
         
         server.notFoundHandler = { request, responseHeaders in
             request.disableKeepAlive = true
+            if let filePath = BootstrapTemplate.absolutePath(for: request.path) {
+                try HttpFileResponse.with(absolutePath: filePath)
+            }
             let filePath = Resource().absolutePath(for: request.path)
-            if let response = self.serveIfExists(filePath: filePath, responseHeaders: responseHeaders) {
-                return response
-            }
+            try HttpFileResponse.with(absolutePath: filePath)
             let picturePath = self.picturesPath + "/\(request.path)"
-            if let response = self.serveIfExists(filePath: picturePath, responseHeaders: responseHeaders) {
-                return response
-            }
+            try HttpFileResponse.with(absolutePath: picturePath)
             print("File `\(filePath)` doesn't exist")
             return .notFound()
         }
-    }
-    
-    private func serveIfExists(filePath: String, responseHeaders: HttpResponseHeaders) -> HttpResponse? {
-        if FileManager.default.fileExists(atPath: filePath) {
-            guard let file = try? filePath.openForReading() else {
-                print("Could not open `\(filePath)`")
-                return .notFound()
-            }
-            let mimeType = filePath.mimeType()
-            responseHeaders.addHeader("Content-Type", mimeType)
-
-            if let attr = try? FileManager.default.attributesOfItem(atPath: filePath),
-               let fileSize = attr[FileAttributeKey.size] as? UInt64 {
-                responseHeaders.addHeader("Content-Length", String(fileSize))
-            }
-
-            return .raw(200, "OK", { writer in
-                try writer.write(file)
-                file.close()
-            })
-        }
-        return nil
     }
 }

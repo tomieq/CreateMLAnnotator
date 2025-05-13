@@ -15,7 +15,10 @@ class FolderDescriptor {
     
     init?(folderPath: String) {
         self.folderPath = folderPath
-        guard FileManager.default.fileExists(atPath: folderPath) else { return nil }
+        guard FileManager.default.fileExists(atPath: folderPath) else {
+            print("Folder \(folderPath) does not exist!")
+            return nil
+        }
         self.descriptorUrl = URL(fileURLWithPath: self.folderPath + "/annotations.json")
         if let data = try? Data(contentsOf: self.descriptorUrl), let images = [Image](json: data) {
             self.images = images
@@ -25,9 +28,10 @@ class FolderDescriptor {
     
     func reloadFiles() {
         let images = try? FileManager.default.contentsOfDirectory(atPath: self.folderPath)
-            .filter { $0.contains(".jpg") }
+            .filter { $0.contains(".jpg") || $0.contains(".png") }
             .sorted()
         self.filenames = images ?? []
+        print("Loaded \(self.filenames.count) images")
     }
     
     func nextFile(to filename: String) -> String? {
